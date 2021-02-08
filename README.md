@@ -35,7 +35,7 @@ By default, the busts will be facing the center of the screen, but can be flippe
 
 For this to work properly, the plugin needs to know the busts' alignment, i.e. whether the bust images are left-facing or right-facing.
 - Left-facing means the bust is looking to the left. In the above screenshot, there is 1 left-facing busts.
-- Right-facing means the bust is looking to the right. In the avoce screenshot, there are 3 right-facing bust.
+- Right-facing means the bust is looking to the right. In the above screenshot, there are 3 right-facing bust.
 
 The alignment can only be set plugin-wide, so all busts must be facing the same direction. The plugin will automatically flip them according to their side and whether they're supposed to be flipped.
 
