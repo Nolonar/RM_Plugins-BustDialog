@@ -33,11 +33,11 @@ By default, the busts will be facing the center of the screen, but can be flippe
 
 ![Facing directions](busts_facing.png)
 
-For this to work properly, the plugin needs to know if the bust images are left-facing or right-facing.
-- Left-facing means the bust is looking to the left. In the above screenshot, there are 3 right-facing busts.
-- Right-facing means the bust is looking to the right. In the avoce screenshot, there is 1 left-facing bust.
+For this to work properly, the plugin needs to know the busts' alignment, i.e. whether the bust images are left-facing or right-facing.
+- Left-facing means the bust is looking to the left. In the above screenshot, there is 1 left-facing busts.
+- Right-facing means the bust is looking to the right. In the avoce screenshot, there are 3 right-facing bust.
 
-All busts must be facing the same direction. The plugin will automatically flip them according to their side and whether they're supposed to be flipped.
+The alignment can only be set plugin-wide, so all busts must be facing the same direction. The plugin will automatically flip them according to their side and whether they're supposed to be flipped.
 
 This plugin will automatically change the tone of the busts depending on whether they're talking or not. For this to work, the name for the `Show Text...` event command must match the one defined when adding the bust.
 
