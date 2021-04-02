@@ -1,7 +1,7 @@
 /* 
  * MIT License
  * 
- * Copyright (c) 2020 Nolonar
+ * Copyright (c) 2021 Nolonar
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -164,7 +164,7 @@
  * @desc Removes all busts from the current scene.
  * 
  * 
- * @help Version 1.0.0
+ * @help Version 1.0.1
  * This plugin will search for bust image files in img/busts. This folder does
  * not exist by default and must be created.
  * 
@@ -461,5 +461,11 @@
         Game_Interpreter_terminate.call(this);
         if (bustManager.isUsedByInterpreter(this))
             bustManager.clear();
+    };
+
+    const Scene_Title_start = Scene_Title.prototype.start;
+    Scene_Title.prototype.start = function () {
+        Scene_Title_start.call(this);
+        bustManager.reset();
     };
 })();
