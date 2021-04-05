@@ -106,6 +106,46 @@
  * @default false
  * 
  * 
+ * @command addBustVar
+ * @text Add actor from variable
+ * @desc Adds an actor's bust to the current scene using a variable for the bust.
+ * 
+ * @arg name
+ * @text Name
+ * @desc The name of the actor. This is used to determine which bust should be highlighted during dialogues.
+ * @type string
+ * 
+ * @arg bustFileVar
+ * @text Bust filename variable
+ * @desc The variable containing the filename for the bust to add to the scene.
+ * @type variable
+ * 
+ * @arg side
+ * @text Side
+ * @desc The side the bust should be added to. Position doesn't matter for neutral side.
+ * @type select
+ * @option left
+ * @option right
+ * @option neutral
+ * @default left
+ * 
+ * @arg position
+ * @text Position
+ * @desc Whether the bust should be in front (near the center) or in the back (near the edge of the screen).
+ * @type select
+ * @option back
+ * @option front
+ * @option center
+ * @default back
+ * 
+ * @arg isFlipped
+ * @text Flip actor
+ * @desc If ON, the actor will be facing the edge of the screen.
+ *       If OFF, the actor will be facing the center instead.
+ * @type boolean
+ * @default false
+ * 
+ * 
  * @command moveBust
  * @text Move actor
  * @desc Move an actor's bust to the specified position.
@@ -262,6 +302,9 @@
     const COMMANDS = {
         addBust: function (args) { // Avoid arrow-function, so we can access Game_Interpreter instance.
             bustManager.addBust(this, args.name, args.bustFile, ...sanitizeArgs(args))
+        },
+        addBustVar: function (args) {
+            bustManager.addBust(this, args.name, $gameVariables.value(args.bustFileVar), ...sanitizeArgs(args))
         },
         moveBust: function (args) {
             const duration = args.duration === "0" ? 0 : Number(args.duration) || 6;
