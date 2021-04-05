@@ -415,6 +415,7 @@
             const list = this[bust.side][bust.position];
             list.remove(bust);
             list.push(bust);
+            bust.isTalking = true;
         }
 
         clear() {
