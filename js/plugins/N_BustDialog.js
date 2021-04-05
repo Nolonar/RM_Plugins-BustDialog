@@ -39,6 +39,7 @@
  * @type select
  * @option left
  * @option right
+ * @option neutral
  * @default left
  * 
  * @param bustOrigin
@@ -230,6 +231,7 @@
     const PLUGIN_NAME = "N_BustDialog";
 
     const OPTION_ALIGNMENT_LEFT = "left";
+    const OPTION_ALIGNMENT_NEUTRAL = "neutral";
     const OPTION_ORIGIN_BOTTOM = "bottom";
     const OPTION_ORIGIN_CENTER = "center";
 
@@ -408,7 +410,7 @@
 
         get targetScaleX() {
             let isFlipNeeded = (this.side === parameters.bustAlignment) !== this.isFlipped;
-            if (this.side === COMMAND_ARG_SIDE_NEUTRAL) {
+            if (this.side === COMMAND_ARG_SIDE_NEUTRAL || parameters.bustAlignment === OPTION_ALIGNMENT_NEUTRAL) {
                 isFlipNeeded = this.isFlipped;
             }
             return isFlipNeeded ? -100 : 100;
