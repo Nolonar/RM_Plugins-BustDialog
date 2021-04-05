@@ -400,6 +400,7 @@
         replaceBust(name, file) {
             const bust = this.findBust(name);
             bust?.changeBust(file);
+            this.moveToForeground(bust);
         }
 
         removeBust(name) {
