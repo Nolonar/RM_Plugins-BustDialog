@@ -15,6 +15,7 @@ Lets you use busts for dialogs instead of faces.
 2. (optional) Use `Move actor` plugin command to have a bust move to a new position. The name must match the one defined when adding the bust.
 3. (optional) Use `Remove actor` plugin command to get rid of a specific bust. The name must match the one defined when adding the bust.
 4. (optional) (New in 1.1.0) Use `Replace actor bust` plugin command to replace an actor's bust with another one. Useful if you have multiple busts for the same character depicting different emotions.
+  - Alternatively, you can use the `Replace actor bust from variable` plugin command to replace an actor's bust with another one whose name is stored in a variable.
 5. (optional) Use `Clear` plugin command to remove all busts.
 
 The busts will automatically be cleared when the event ends, so there's no need to use the `Clear` plugin command unless you want to clear early.

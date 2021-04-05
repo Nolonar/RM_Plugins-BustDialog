@@ -212,6 +212,21 @@
  * @require 1
  * 
  * 
+ * @command replaceBustVar
+ * @text Replace actor bust from variable
+ * @desc Replaces the actor's current bust with a new one using a variable for the bust. Useful for displaying emotions.
+ * 
+ * @arg name
+ * @text Name
+ * @desc The name of the actor whose bust to change. This must match the name defined when adding the actor.
+ * @type string
+ * 
+ * @arg bustFileVar
+ * @text Bust filename variable
+ * @desc The variable containing the filename for the new bust.
+ * @type variable
+ * 
+ * 
  * @command removeBust
  * @text Remove actor
  * @desc Removes an actor's bust from the current scene.
@@ -278,7 +293,7 @@
  *      duplicate name will be ignored.
  * 
  * Add actor from variable
- *      Same as Add actor, but the name of the bust file is taken from a
+ *      Same as "Add actor", but the name of the bust file is taken from a
  *      variable instead. Useful if players can choose different playable
  *      characters.
  * 
@@ -289,6 +304,12 @@
  * Replace actor bust
  *      Replaces a bust already on the scene. Useful if you own multiple busts
  *      for the same character, representing different emotions.
+ * 
+ * Replace actor bust from variable
+ *      Same as "Replace actor bust", but the name of the bust file is taken
+ *      from a variable instead. Useful if players can choose different
+ *      playable characters and you own multiple busts for the same character,
+ *      representing different emotions.
  * 
  * Remove actor
  *      Removes the bust from the scene. Once removed, busts can no longer be
@@ -372,6 +393,7 @@
                 this.wait(duration);
         },
         replaceBust: args => bustManager.replaceBust(args.name, args.bustFile),
+        replaceBustVar: args => bustManager.replaceBust(args.name, $gameVariables.value(args.bustFileVar)),
         removeBust: args => bustManager.removeBust(args.name),
         clear: () => bustManager.clear(),
         enableAutoTint: () => bustManager.isAutoTintEnabled = true,
