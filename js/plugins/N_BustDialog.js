@@ -155,6 +155,23 @@
  * @default true
  * 
  * 
+ * @command replaceBust
+ * @text Replace actor bust
+ * @desc Replaces the actor's current bust with a new one. Useful for displaying emotions.
+ * 
+ * @arg name
+ * @text Name
+ * @desc The name of the actor whose bust to change. This must match the name defined when adding the actor.
+ * @type string
+ * 
+ * @arg bustFile
+ * @text New bust
+ * @desc The new bust.
+ * @type file
+ * @dir img/busts/
+ * @require 1
+ * 
+ * 
  * @command removeBust
  * @text Remove actor
  * @desc Removes an actor's bust from the current scene.
@@ -235,10 +252,6 @@
     const OPTION_ORIGIN_BOTTOM = "bottom";
     const OPTION_ORIGIN_CENTER = "center";
 
-    const COMMAND_ADDBUST = "addBust";
-    const COMMAND_MOVEBUST = "moveBust";
-    const COMMAND_REMOVEBUST = "removeBust";
-    const COMMAND_CLEAR = "clear";
     const COMMAND_ARG_SIDE_LEFT = "left";
     const COMMAND_ARG_SIDE_RIGHT = "right";
     const COMMAND_ARG_SIDE_NEUTRAL = "neutral";
@@ -246,27 +259,29 @@
     const COMMAND_ARG_POSITION_FRONT = "front";
     const COMMAND_ARG_POSITION_CENTER = "center";
 
+    const COMMANDS = {
+        addBust: function (args) { // Avoid arrow-function, so we can access Game_Interpreter instance.
+            bustManager.addBust(this, args.name, args.bustFile, ...sanitizeArgs(args))
+        },
+        moveBust: function (args) {
+            const duration = args.duration === "0" ? 0 : Number(args.duration) || 6;
+            bustManager.moveBust(args.name, ...sanitizeArgs(args), duration);
+            if (args.isBlocking !== "false")
+                this.wait(duration);
+        },
+        replaceBust: args => bustManager.replaceBust(args.name, args.bustFile),
+        removeBust: args => bustManager.removeBust(args.name),
+        clear: () => bustManager.clear()
+    };
+    for (const command in COMMANDS) {
+        PluginManager.registerCommand(PLUGIN_NAME, command, COMMANDS[command]);
+    }
+
     const parameters = PluginManager.parameters(PLUGIN_NAME);
     parameters.bustAlignment = parameters.bustAlignment || OPTION_ALIGNMENT_LEFT;
     parameters.bustOrigin = parameters.bustOrigin || OPTION_ORIGIN_BOTTOM;
     parameters.activeTint = parseTint(parameters.activeTint, { r: 0, g: 0, b: 0, gray: 0 });
     parameters.inactiveTint = parseTint(parameters.inactiveTint, { r: -100, g: -100, b: -100, gray: 0 });
-
-    PluginManager.registerCommand(PLUGIN_NAME, COMMAND_ADDBUST, function (args) {
-        bustManager.addBust(this, args.name, args.bustFile, ...sanitizeArgs(args));
-    });
-    PluginManager.registerCommand(PLUGIN_NAME, COMMAND_MOVEBUST, function (args) {
-        const duration = args.duration === "0" ? 0 : Number(args.duration) || 6;
-        bustManager.moveBust(args.name, ...sanitizeArgs(args), duration);
-        if (args.isBlocking !== "false")
-            this.wait(duration);
-    });
-    PluginManager.registerCommand(PLUGIN_NAME, COMMAND_REMOVEBUST, args => {
-        bustManager.removeBust(args.name);
-    });
-    PluginManager.registerCommand(PLUGIN_NAME, COMMAND_CLEAR, () => {
-        bustManager.clear();
-    });
 
     function parseTint(string, def) {
         const tint = string ? JSON.parse(string) : def;
@@ -326,6 +341,11 @@
             bust.moveBust(side, position, isFlipped, duration);
         }
 
+        replaceBust(name, file) {
+            const bust = this.findBust(name);
+            bust?.changeBust(file);
+        }
+
         removeBust(name) {
             const bust = this.findBust(name);
             if (!bust) return;
@@ -368,6 +388,11 @@
             this.setArguments(side, position, isFlipped);
             const easing = 3;
             this.move(...this.targetArguments, duration, easing);
+        }
+
+        changeBust(file) {
+            this.file = file;
+            this.showBust(this.side, this.position, this.isFlipped);
         }
 
         setArguments(side, position, isFlipped) {
