@@ -324,6 +324,12 @@
             this[bust.side][bust.position].remove(bust);
         }
 
+        moveToForeground(bust) {
+            const list = this[bust.side][bust.position];
+            list.remove(bust);
+            list.push(bust);
+        }
+
         clear() {
             [COMMAND_ARG_SIDE_LEFT, COMMAND_ARG_SIDE_RIGHT].flatMap(side =>
                 [COMMAND_ARG_POSITION_BACK, COMMAND_ARG_POSITION_FRONT].map(position => this[side][position])
@@ -453,7 +459,11 @@
     const Game_Message_setSpeakerName = Game_Message.prototype.setSpeakerName;
     Game_Message.prototype.setSpeakerName = function (speakerName) {
         Game_Message_setSpeakerName.call(this, speakerName);
-        bustManager.busts.forEach(b => b.isTalking = b.actorName === speakerName);
+        bustManager.busts.forEach(b => {
+            b.isTalking = b.actorName === speakerName
+            if (b.isTalking)
+                bustManager.moveToForeground(b);
+        });
     };
 
     const Game_Interpreter_terminate = Game_Interpreter.prototype.terminate;
