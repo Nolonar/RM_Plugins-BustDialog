@@ -459,6 +459,8 @@
     const Game_Message_setSpeakerName = Game_Message.prototype.setSpeakerName;
     Game_Message.prototype.setSpeakerName = function (speakerName) {
         Game_Message_setSpeakerName.call(this, speakerName);
+        if (speakerName === "") return;
+
         bustManager.busts.forEach(b => {
             b.isTalking = b.actorName === speakerName
             if (b.isTalking)
