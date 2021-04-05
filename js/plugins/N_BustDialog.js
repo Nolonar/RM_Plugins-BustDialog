@@ -38,8 +38,8 @@
  *       All bust images must face the same way.
  * @type select
  * @option left
- * @option right
  * @option neutral
+ * @option right
  * @default left
  * 
  * @param bustOrigin
@@ -85,8 +85,8 @@
  * @desc The side the bust should be added to. Position doesn't matter for neutral side.
  * @type select
  * @option left
- * @option right
  * @option neutral
+ * @option right
  * @default left
  * 
  * @arg position
@@ -94,8 +94,8 @@
  * @desc Whether the bust should be in front (near the center) or in the back (near the edge of the screen).
  * @type select
  * @option back
- * @option front
  * @option center
+ * @option front
  * @default back
  * 
  * @arg isFlipped
@@ -125,8 +125,8 @@
  * @desc The side the bust should be added to. Position doesn't matter for neutral side.
  * @type select
  * @option left
- * @option right
  * @option neutral
+ * @option right
  * @default left
  * 
  * @arg position
@@ -134,8 +134,8 @@
  * @desc Whether the bust should be in front (near the center) or in the back (near the edge of the screen).
  * @type select
  * @option back
- * @option front
  * @option center
+ * @option front
  * @default back
  * 
  * @arg isFlipped
@@ -160,8 +160,8 @@
  * @desc The side the bust should be moved to. Position doesn't matter for neutral side.
  * @type select
  * @option left
- * @option right
  * @option neutral
+ * @option right
  * @default left
  * 
  * @arg position
@@ -169,8 +169,8 @@
  * @desc If not changing side, actor will switch position with another actor on the same side.
  * @type select
  * @option back
- * @option front
  * @option center
+ * @option front
  * @default back
  * 
  * @arg isFlipped
@@ -227,12 +227,31 @@
  * 
  * 
  * @command enableAutoTint
- * @text Enable Auto-tint
+ * @text Enable Auto-highlight
  * @desc While enabled, busts are automatically tinted to indicate who is talking. Enabled by default.
  * 
+ * 
  * @command disableAutoTint
- * @text Disable Auto-tint
+ * @text Disable Auto-highlight
  * @desc While disabled, busts are no longer automatically tinted to indicate who is talking.
+ * 
+ * 
+ * @command makeBustActive
+ * @text Highlight actor
+ * @desc Highlights an actor, making them appear as if they were talking. Useful when Auto-highlight is disabled.
+ * 
+ * @arg name
+ * @text Name
+ * @desc The name of the actor to highlight.
+ * 
+ * 
+ * @command makeBustInactive
+ * @text Unhighlight actor
+ * @desc Removes highlight from actor. Useful when Auto-highlight is disabled.
+ * 
+ * @arg name
+ * @text Name
+ * @desc The name of the actor to remove highlight from.
  * 
  * 
  * @help Version 1.1.0
@@ -247,16 +266,29 @@
  * ============================================================================
  * Add actor
  *      Adds a bust to the scene. Multiple busts can be added, but since there
- *      are only 4 possible slots for busts, only 4 can be displayed at once.
- *      If another bust has been added to the same slot, it will be hidden
- *      the newer bust has moved or been removed.
+ *      are only 7 possible slots for busts, only 7 can be displayed at once.
+ *      If a bust is added to the same slot as another, they will be stacked.
+ *      Only the bust at the top of the stack (the newer bust) will be visible,
+ *      older busts will be hidden until all newer busts have been removed from
+ *      the stack, which can also happen by moving them to another spot. If a
+ *      bust is talking, has been replaced, or is being highlighted, it will
+ *      automatically be moved to the top of the stack.
  * 
  *      Note: Do not add multiple actors with the same name. Any actor with
  *      duplicate name will be ignored.
  * 
+ * Add actor from variable
+ *      Same as Add actor, but the name of the bust file is taken from a
+ *      variable instead. Useful if players can choose different playable
+ *      characters.
+ * 
  * Move actor
  *      Moves a bust. If the bust is not currently visible, it will become
  *      visible.
+ * 
+ * Replace actor bust
+ *      Replaces a bust already on the scene. Useful if you own multiple busts
+ *      for the same character, representing different emotions.
  * 
  * Remove actor
  *      Removes the bust from the scene. Once removed, busts can no longer be
@@ -264,7 +296,25 @@
  * 
  * Clear
  *      Removes all busts. This is equivalent to using "Remove actor" for all
- *      busts.
+ *      busts. This is automatically called when the event ends.
+ * 
+ * Enable Auto-highlight
+ *      Enabled by default. When a bust is talking, it will be highlighted to
+ *      indicate the actor is talking. Only useful if Auto-highlight has been
+ *      disabled previously. This is automatically called when the event ends.
+ * 
+ * Disable Auto-highlight
+ *      Useful if you want to manually highlight busts, for example when a
+ *      character is introducing other characters, and multiple busts must be
+ *      highlighted simultaneously.
+ * 
+ * Highlight actor
+ *      Can be used to manually highlight a bust when Auto-highlight is
+ *      disabled.
+ * 
+ * Unhighlight actor
+ *      Can be used to manually remove highlight from a bust when
+ *      Auto-highlight is enabled.
  */
 
 /*~struct~tint:
@@ -325,7 +375,9 @@
         removeBust: args => bustManager.removeBust(args.name),
         clear: () => bustManager.clear(),
         enableAutoTint: () => bustManager.isAutoTintEnabled = true,
-        disableAutoTint: () => bustManager.isAutoTintEnabled = false
+        disableAutoTint: () => bustManager.isAutoTintEnabled = false,
+        makeBustActive: args => bustManager.setBustHighlight(args.name, true),
+        makeBustInactive: args => bustManager.setBustHighlight(args.name, false)
     };
     for (const command in COMMANDS) {
         PluginManager.registerCommand(PLUGIN_NAME, command, COMMANDS[command]);
@@ -401,6 +453,7 @@
             const bust = this.findBust(name);
             bust?.changeBust(file);
             this.moveToForeground(bust);
+            bust.isTalking = true;
         }
 
         removeBust(name) {
@@ -415,7 +468,14 @@
             const list = this[bust.side][bust.position];
             list.remove(bust);
             list.push(bust);
-            bust.isTalking = true;
+        }
+
+        setBustHighlight(bustName, isHighlighted) {
+            const bust = this.findBust(bustName);
+            if (!bust) return;
+
+            this.moveToForeground(bust);
+            bust.isTalking = isHighlighted;
         }
 
         clear() {
