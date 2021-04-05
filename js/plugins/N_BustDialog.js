@@ -81,10 +81,11 @@
  * 
  * @arg side
  * @text Side
- * @desc The side the bust should be added to.
+ * @desc The side the bust should be added to. Position doesn't matter for neutral side.
  * @type select
  * @option left
  * @option right
+ * @option neutral
  * @default left
  * 
  * @arg position
@@ -93,6 +94,7 @@
  * @type select
  * @option back
  * @option front
+ * @option center
  * @default back
  * 
  * @arg isFlipped
@@ -114,10 +116,11 @@
  * 
  * @arg side
  * @text Side
- * @desc The side the bust should be moved to.
+ * @desc The side the bust should be moved to. Position doesn't matter for neutral side.
  * @type select
  * @option left
  * @option right
+ * @option neutral
  * @default left
  * 
  * @arg position
@@ -126,6 +129,7 @@
  * @type select
  * @option back
  * @option front
+ * @option center
  * @default back
  * 
  * @arg isFlipped
@@ -235,8 +239,10 @@
     const COMMAND_CLEAR = "clear";
     const COMMAND_ARG_SIDE_LEFT = "left";
     const COMMAND_ARG_SIDE_RIGHT = "right";
+    const COMMAND_ARG_SIDE_NEUTRAL = "neutral";
     const COMMAND_ARG_POSITION_BACK = "back";
     const COMMAND_ARG_POSITION_FRONT = "front";
+    const COMMAND_ARG_POSITION_CENTER = "center";
 
     const parameters = PluginManager.parameters(PLUGIN_NAME);
     parameters.bustAlignment = parameters.bustAlignment || OPTION_ALIGNMENT_LEFT;
@@ -276,10 +282,12 @@
     const bustManager = new class BustManager {
         constructor() {
             this.busts = [];
+            this[COMMAND_ARG_SIDE_NEUTRAL] = [];
             for (const side of [COMMAND_ARG_SIDE_LEFT, COMMAND_ARG_SIDE_RIGHT]) {
                 this[side] = {
                     [COMMAND_ARG_POSITION_BACK]: [],
-                    [COMMAND_ARG_POSITION_FRONT]: []
+                    [COMMAND_ARG_POSITION_FRONT]: [],
+                    [COMMAND_ARG_POSITION_CENTER]: []
                 };
             }
             this.interpreters = [];
@@ -331,9 +339,11 @@
         }
 
         clear() {
-            [COMMAND_ARG_SIDE_LEFT, COMMAND_ARG_SIDE_RIGHT].flatMap(side =>
-                [COMMAND_ARG_POSITION_BACK, COMMAND_ARG_POSITION_FRONT].map(position => this[side][position])
-            ).concat([this.busts]).forEach(a => a.length = 0);
+            [COMMAND_ARG_SIDE_LEFT, COMMAND_ARG_SIDE_RIGHT].flatMap(side => [
+                COMMAND_ARG_POSITION_BACK,
+                COMMAND_ARG_POSITION_FRONT,
+                COMMAND_ARG_POSITION_CENTER
+            ].map(position => this[side][position])).concat([this.busts, this[COMMAND_ARG_SIDE_NEUTRAL]]).forEach(a => a.length = 0);
         }
     }();
 
@@ -377,15 +387,17 @@
         }
 
         get targetX() {
-            const step = Graphics.width / 6;
-            return {
+            const step = Graphics.width / 8;
+            return this.side === COMMAND_ARG_SIDE_NEUTRAL ? 4 * step : {
                 [COMMAND_ARG_SIDE_LEFT]: {
                     [COMMAND_ARG_POSITION_BACK]: 1 * step,
-                    [COMMAND_ARG_POSITION_FRONT]: 2 * step
+                    [COMMAND_ARG_POSITION_CENTER]: 2 * step,
+                    [COMMAND_ARG_POSITION_FRONT]: 3 * step
                 },
                 [COMMAND_ARG_SIDE_RIGHT]: {
-                    [COMMAND_ARG_POSITION_FRONT]: 4 * step,
-                    [COMMAND_ARG_POSITION_BACK]: 5 * step
+                    [COMMAND_ARG_POSITION_FRONT]: 5 * step,
+                    [COMMAND_ARG_POSITION_CENTER]: 6 * step,
+                    [COMMAND_ARG_POSITION_BACK]: 7 * step
                 }
             }[this.side][this.position];
         }
@@ -395,7 +407,10 @@
         }
 
         get targetScaleX() {
-            const isFlipNeeded = (this.side === parameters.bustAlignment) !== this.isFlipped;
+            let isFlipNeeded = (this.side === parameters.bustAlignment) !== this.isFlipped;
+            if (this.side === COMMAND_ARG_SIDE_NEUTRAL) {
+                isFlipNeeded = this.isFlipped;
+            }
             return isFlipNeeded ? -100 : 100;
         }
 
@@ -408,9 +423,12 @@
         picture() {
             return {
                 0: bustManager.left.front,
-                1: bustManager.left.back,
-                2: bustManager.right.front,
-                3: bustManager.right.back
+                1: bustManager.left.center,
+                2: bustManager.left.back,
+                3: bustManager.neutral,
+                4: bustManager.right.front,
+                5: bustManager.right.center,
+                6: bustManager.right.back
             }[this._pictureId].slice(-1)[0];
         }
 
@@ -441,7 +459,7 @@
         const rect = this.pictureContainerRect();
         const bustContainer = new Sprite();
         bustContainer.setFrame(rect.x, rect.y, rect.width, rect.height);
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 7; i++) {
             bustContainer.addChild(new Sprite_Bust(i));
         }
         this.addChild(bustContainer);
