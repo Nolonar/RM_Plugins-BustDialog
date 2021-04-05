@@ -226,6 +226,15 @@
  * @desc Removes all busts from the current scene.
  * 
  * 
+ * @command enableAutoTint
+ * @text Enable Auto-tint
+ * @desc While enabled, busts are automatically tinted to indicate who is talking. Enabled by default.
+ * 
+ * @command disableAutoTint
+ * @text Disable Auto-tint
+ * @desc While disabled, busts are no longer automatically tinted to indicate who is talking.
+ * 
+ * 
  * @help Version 1.1.0
  * This plugin will search for bust image files in img/busts. This folder does
  * not exist by default and must be created.
@@ -314,7 +323,9 @@
         },
         replaceBust: args => bustManager.replaceBust(args.name, args.bustFile),
         removeBust: args => bustManager.removeBust(args.name),
-        clear: () => bustManager.clear()
+        clear: () => bustManager.clear(),
+        enableAutoTint: () => bustManager.isAutoTintEnabled = true,
+        disableAutoTint: () => bustManager.isAutoTintEnabled = false
     };
     for (const command in COMMANDS) {
         PluginManager.registerCommand(PLUGIN_NAME, command, COMMANDS[command]);
@@ -340,6 +351,8 @@
     }
 
     const bustManager = new class BustManager {
+        isAutoTintEnabled = true;
+
         constructor() {
             this.busts = [];
             this[COMMAND_ARG_SIDE_NEUTRAL] = [];
@@ -410,6 +423,11 @@
                 COMMAND_ARG_POSITION_CENTER
             ].map(position => this[side][position])).concat([this.busts, this[COMMAND_ARG_SIDE_NEUTRAL]]).forEach(a => a.length = 0);
         }
+
+        reset() {
+            this.clear();
+            this.isAutoTintEnabled = true;
+        }
     }();
 
     class Game_Bust extends Game_Picture {
@@ -442,6 +460,17 @@
             this.side = side;
             this.position = position;
             this.isFlipped = isFlipped;
+        }
+
+        get isTalking() {
+            return this._isTalking;
+        }
+
+        set isTalking(value) {
+            this._isTalking = value;
+
+            if (bustManager.isAutoTintEnabled)
+                this._tone = this.isTalking ? parameters.activeTint : parameters.inactiveTint;
         }
 
         get targetArguments() {
@@ -512,11 +541,7 @@
 
         updateTone() {
             const bust = this.picture();
-            const tone = {
-                [true]: parameters.activeTint,
-                [false]: parameters.inactiveTint
-            }[bust.isTalking];
-            this.setColorTone(tone);
+            this.setColorTone(bust.tone() || parameters.activeTint);
         }
 
         loadBitmap() {
@@ -560,7 +585,7 @@
     Game_Interpreter.prototype.terminate = function () {
         Game_Interpreter_terminate.call(this);
         if (bustManager.isUsedByInterpreter(this))
-            bustManager.clear();
+            bustManager.reset();
     };
 
     const Scene_Title_start = Scene_Title.prototype.start;
