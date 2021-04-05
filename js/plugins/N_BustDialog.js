@@ -27,7 +27,7 @@
 //=============================================================================
 /*:
  * @target MZ
- * @plugindesc Lets you use busts for dialogs instead of faces.
+ * @plugindesc Lets you use busts for dialogues instead of faces.
  * @author Nolonar
  * @url https://github.com/Nolonar/RM_Plugins
  * 
@@ -70,7 +70,7 @@
  * 
  * @arg name
  * @text Name
- * @desc The name of the actor. This is used to determine which bust should be highlighted during dialogs.
+ * @desc The name of the actor. This is used to determine which bust should be highlighted during dialogues.
  * @type string
  * 
  * @arg bustFile
@@ -169,7 +169,7 @@
  * @desc Removes all busts from the current scene.
  * 
  * 
- * @help Version 1.0.1
+ * @help Version 1.1.0
  * This plugin will search for bust image files in img/busts. This folder does
  * not exist by default and must be created.
  * 
