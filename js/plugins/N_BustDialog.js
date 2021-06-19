@@ -269,7 +269,7 @@
  * @desc The name of the actor to remove highlight from.
  * 
  * 
- * @help Version 1.1.0
+ * @help Version 1.1.1
  * This plugin will search for bust image files in img/busts. This folder does
  * not exist by default and must be created.
  * 
