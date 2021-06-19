@@ -440,6 +440,10 @@
             this.interpreters = [];
         }
 
+        getBustStack(side, position) {
+            return side === COMMAND_ARG_SIDE_NEUTRAL ? this[side] : this[side][position];
+        }
+
         isUsedByInterpreter(interpreter) {
             return this.interpreters.some(i => i === interpreter);
         }
@@ -458,7 +462,7 @@
 
             const bust = new Game_Bust(this.busts.length, name, file);
             this.busts.push(bust);
-            this[side][position].push(bust);
+            this.getBustStack(side, position).push(bust);
             bust.showBust(side, position, isFlipped);
         }
 
@@ -466,8 +470,8 @@
             const bust = this.findBust(name);
             if (!bust) return;
 
-            this[bust.side][bust.position].remove(bust);
-            this[side][position].push(bust);
+            this.getBustStack(bust.side, bust.position).remove(bust);
+            this.getBustStack(side, position).push(bust);
             bust.moveBust(side, position, isFlipped, duration);
         }
 
@@ -483,13 +487,13 @@
             if (!bust) return;
 
             this.busts.remove(bust);
-            this[bust.side][bust.position].remove(bust);
+            this.getBustStack(bust.side, bust.position).remove(bust);
         }
 
         moveToForeground(bust) {
-            const list = this[bust.side][bust.position];
-            list.remove(bust);
-            list.push(bust);
+            const bustStack = this.getBustStack(bust.side, bust.position);
+            bustStack.remove(bust);
+            bustStack.push(bust);
         }
 
         setBustHighlight(bustName, isHighlighted) {
@@ -505,7 +509,7 @@
                 COMMAND_ARG_POSITION_BACK,
                 COMMAND_ARG_POSITION_FRONT,
                 COMMAND_ARG_POSITION_CENTER
-            ].map(position => this[side][position])).concat([this.busts, this[COMMAND_ARG_SIDE_NEUTRAL]]).forEach(a => a.length = 0);
+            ].map(position => this.getBustStack(side, position))).concat([this.busts, this[COMMAND_ARG_SIDE_NEUTRAL]]).forEach(a => a.length = 0);
         }
 
         reset() {
