@@ -269,7 +269,7 @@
  * @desc The name of the actor to remove highlight from.
  * 
  * 
- * @help Version 1.1.1
+ * @help Version 1.1.2
  * This plugin will search for bust image files in img/busts. This folder does
  * not exist by default and must be created.
  * 
@@ -637,8 +637,10 @@
         }
     }
 
-    const Spriteset_Base_createUpperLayer = Spriteset_Base.prototype.createUpperLayer;
-    Spriteset_Base.prototype.createUpperLayer = function () {
+    const Spriteset_Base_createPictures = Spriteset_Base.prototype.createPictures;
+    Spriteset_Base.prototype.createPictures = function () {
+        Spriteset_Base_createPictures.call(this);
+
         const rect = this.pictureContainerRect();
         const bustContainer = new Sprite();
         bustContainer.setFrame(rect.x, rect.y, rect.width, rect.height);
@@ -646,8 +648,6 @@
             bustContainer.addChild(new Sprite_Bust(i));
         }
         this.addChild(bustContainer);
-
-        Spriteset_Base_createUpperLayer.call(this);
     }
 
     const Game_Screen_update = Game_Screen.prototype.update;
